@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://yjs121256.github.io/quiet-nib-notes/sitemap.xml
+Sitemap: https://quietnibnotes.com/sitemap.xml
