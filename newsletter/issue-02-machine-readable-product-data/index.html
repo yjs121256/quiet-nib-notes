@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Issue 2: &quot;Machine-readable product data&quot; means two different things. Here are both specs, side by side. — Quiet Nib Notes</title>
+  <meta name="description" content="Google merchant-listing JSON-LD and OpenAI's product feed, compared from primary documentation, plus a ten-minute store check.">
+  <link rel="canonical" href="https://yjs121256.github.io/quiet-nib-notes/newsletter/issue-02-machine-readable-product-data/">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../css/site.css">
+  
+</head>
+<body>
+  <header class="site-header">
+  <div class="inner">
+    <a class="wordmark" href="../../">
+      <svg class="mark" width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+  <path fill="currentColor" d="M14 2.2c.5 0 .9.2 1.2.6l8.2 11.3c.5.7.3 1.7-.5 2.1l-7.4 3.7c-.9.45-1.9.45-2.8 0L4.3 16.2c-.8-.4-1-1.4-.5-2.1L12.8 2.8c.3-.4.7-.6 1.2-.6zm0 4.3L8.2 14.4 14 17.3l5.8-2.9L14 6.5zm-1.1 12.3 1.1 5.5 1.1-5.5c-.7.15-1.5.15-2.2 0z"/>
+</svg>
+      <span>Quiet Nib Notes</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="../../#guides">Guides</a>
+      <a href="../../newsletter/" class="is-active">Newsletter</a>
+      <a href="../../about/">About</a>
+    </nav>
+  </div>
+</header>
+  <main class="wrap">
+    
+        <p class="crumbs"><a href="../../">Home</a> · <a href="../">Newsletter</a> · Issue 2</p>
+        <article class="prose">
+          <p class="kicker">Merchant Evidence Brief · Issue 2</p>
+          <h1>&quot;Machine-readable product data&quot; means two different things. Here are both specs, side by side.</h1>
+          <p><em>Sources checked 22 November 2026 (Korea Standard Time, UTC+9). Published here as a web archive.</em></p>
+<p>Last issue covered <em>who</em> reads your site. This one covers <em>what</em> they need. There are two common ways a store hands structured product facts to machines:</p>
+<ol>
+<li><strong>On-page structured data</strong>: JSON-LD on each product page, read by crawlers like Googlebot.</li>
+<li><strong>A product feed</strong>: a file (CSV, TSV, JSON) you submit with one row per item, such as the product feed OpenAI documents for its shopping surfaces.</li>
+</ol>
+<p>They overlap, but their rules differ in ways that cause silent rejections. Below is what each primary source requires.</p>
+<hr>
+<h3 id="1-google-merchant-listings-on-page-json-ld">1. Google merchant listings (on-page JSON-LD)</h3>
+<p>Google&rsquo;s merchant-listing documentation covers product pages where a customer can buy (<a href="https://developers.google.com/search/docs/appearance/structured-data/merchant-listing">Google</a>). The required core:</p>
+<ul>
+<li>A <code>Product</code> with <strong><code>name</code></strong>, <strong><code>image</code></strong>, and <strong><code>offers</code></strong>, and the offer has to be an individual <strong><code>Offer</code></strong>. Google&rsquo;s general Product snippet docs accept <code>AggregateOffer</code> for pages that list several sellers, but merchant listings are about a single seller&rsquo;s offer (<a href="https://developers.google.com/search/docs/appearance/structured-data/merchant-listing">Google</a>; <a href="https://developers.google.com/search/docs/appearance/structured-data/product">Google — product snippets</a>).</li>
+<li>The <code>Offer</code> needs a <strong>price</strong>, either <code>price</code> or <code>priceSpecification.price</code>, with its <strong>currency</strong>, and Google requires the price to be <strong>greater than zero</strong> for merchant listings (<a href="https://developers.google.com/search/docs/appearance/structured-data/merchant-listing">Google</a>).</li>
+<li>Many other properties (description, availability, brand, GTIN, shipping, return policy) are listed as <strong>recommended</strong>: helpful, not required (<a href="https://developers.google.com/search/docs/appearance/structured-data/merchant-listing">Google</a>).</li>
+</ul>
+<p>Google&rsquo;s AI-features guidance adds a related fundamental: &ldquo;making sure your structured data matches the visible text on the page&rdquo; (<a href="https://developers.google.com/search/docs/appearance/ai-features">Google — AI features</a>). Markup claiming a price or stock state the page doesn&rsquo;t show is a problem in its own right.</p>
+<p><strong>Common misreadings</strong>
+- &ldquo;If the Rich Results Test passes, I&rsquo;m eligible.&rdquo; Passing validation isn&rsquo;t a guarantee of display. Google&rsquo;s documentation consistently separates eligibility from serving (<a href="https://developers.google.com/search/docs/appearance/ai-features">Google — AI features</a>).
+- &ldquo;AggregateOffer is fine everywhere.&rdquo; For merchant listings, use an <code>Offer</code>.</p>
+<hr>
+<h3 id="2-openais-product-feed-file-upload">2. OpenAI&rsquo;s product feed (file upload)</h3>
+<p>OpenAI&rsquo;s product feed reference describes a discovery feed with stricter, row-level rules (<a href="https://developers.openai.com/commerce/specs/file-upload/products">OpenAI</a>):</p>
+<ul>
+<li><strong>One row per purchasable item or variant.</strong> Variants get their own row with a distinct <code>item_id</code>, sharing a <code>group_id</code>.</li>
+<li><strong>Required discovery fields:</strong> <code>item_id</code>, <code>title</code>, <code>description</code>, <code>url</code>, <code>brand</code>, <code>seller_name</code>, <code>image_url</code>, <code>availability</code>, <code>price</code>, plus geo fields <code>target_countries</code> and <code>store_country</code> (<a href="https://developers.openai.com/commerce/specs/file-upload/products">OpenAI</a>).</li>
+<li><strong>Availability is an enumeration:</strong> <code>in_stock</code>, <code>out_of_stock</code>, <code>pre_order</code>, <code>backorder</code>, or <code>unknown</code>. The docs state: &ldquo;Omitted, empty, or unrecognized values reject the row.&rdquo; Use <code>unknown</code> explicitly if you don&rsquo;t know (<a href="https://developers.openai.com/commerce/specs/file-upload/products">OpenAI</a>).</li>
+<li><strong>Price is a money string</strong> such as <code>79.99 USD</code>, in major currency units (<a href="https://developers.openai.com/commerce/specs/file-upload/products">OpenAI</a>).</li>
+<li><strong>No placeholders.</strong> &ldquo;Do not use placeholder strings such as <code>null</code>, <code>unknown</code>, or <code>n/a</code>.&rdquo; For optional fields, omit unknown values. <code>unknown</code> is valid only where explicitly listed (<a href="https://developers.openai.com/commerce/specs/file-upload/products">OpenAI</a>).</li>
+<li><strong>Format hygiene:</strong> UTF-8, absolute HTTP(S) URLs (HTTPS preferred), and identifiers kept as strings &ldquo;to preserve leading zeros.&rdquo; CSV cells with commas, quotes, or newlines must be quoted, with embedded quotes doubled (<a href="https://developers.openai.com/commerce/specs/file-upload/products">OpenAI</a>).</li>
+<li><strong>GTIN (optional):</strong> exactly 8, 12, 13, or 14 digits with a valid check digit, leading zeros preserved, no spaces or dashes. Omit it if unassigned (<a href="https://developers.openai.com/commerce/specs/file-upload/products">OpenAI</a>).</li>
+<li><strong>Length guidance:</strong> aim for at most 150 characters for titles and 5,000 for descriptions (<a href="https://developers.openai.com/commerce/specs/file-upload/products">OpenAI</a>).</li>
+<li>Ads and checkout have <strong>separate</strong> requirements from the discovery feed (<a href="https://developers.openai.com/commerce/specs/file-upload/products">OpenAI</a>).</li>
+</ul>
+<hr>
+<h3 id="3-side-by-side">3. Side by side</h3>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Google merchant listing (JSON-LD)</th>
+<th>OpenAI product feed (file)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit</td>
+<td>One product page</td>
+<td>One row per item/variant</td>
+</tr>
+<tr>
+<td>Required identity</td>
+<td><code>name</code>, <code>image</code></td>
+<td><code>item_id</code>, <code>title</code>, <code>image_url</code>, <code>url</code>, <code>brand</code>, <code>seller_name</code>, <code>description</code></td>
+</tr>
+<tr>
+<td>Offer/price</td>
+<td>Individual <code>Offer</code> with price + currency, price &gt; 0</td>
+<td><code>price</code> as amount + currency string</td>
+</tr>
+<tr>
+<td>Availability</td>
+<td>Recommended</td>
+<td>Required enum; bad value rejects the row</td>
+</tr>
+<tr>
+<td>GTIN</td>
+<td>Recommended</td>
+<td>Optional; strict digits + check digit</td>
+</tr>
+<tr>
+<td>Placeholders</td>
+<td>Not addressed in the sections cited here</td>
+<td>Explicitly prohibited</td>
+</tr>
+</tbody>
+</table>
+<p>Sources: <a href="https://developers.google.com/search/docs/appearance/structured-data/merchant-listing">Google</a>; <a href="https://developers.openai.com/commerce/specs/file-upload/products">OpenAI</a>.</p>
+<hr>
+<h3 id="4-where-spreadsheets-quietly-break-feeds">4. Where spreadsheets quietly break feeds</h3>
+<p>Most of the OpenAI rules above are ones spreadsheets violate by default:</p>
+<ul>
+<li><strong>Leading zeros:</strong> a GTIN like <code>0950...</code> opened in a spreadsheet can lose its first digit. Long numbers may appear as <code>9.506E+12</code>.</li>
+<li><strong>Availability drift:</strong> &ldquo;In Stock&rdquo;, &ldquo;available&rdquo;, and <code>preorder</code> aren&rsquo;t <code>in_stock</code> or <code>pre_order</code>.</li>
+<li><strong>&ldquo;N/A&rdquo; in empty cells:</strong> a habit the OpenAI spec explicitly asks you not to follow.</li>
+<li><strong>Formula-like text:</strong> cells starting with <code>=</code>, <code>+</code>, <code>-</code>, or <code>@</code> can be executed when a colleague opens the CSV, which OWASP calls CSV injection (<a href="https://owasp.org/www-community/attacks/CSV_Injection">OWASP</a>). That&rsquo;s a safety issue for anyone opening the file, separate from feed validity.</li>
+</ul>
+<hr>
+<h3 id="5-which-one-do-you-need">5. Which one do you need?</h3>
+<p>It depends on where you want to appear, and the sources keep those decisions separate:</p>
+<ul>
+<li><strong>Google Search product experiences:</strong> on-page structured data is the documented route for merchant listings. Google also lists keeping Merchant Center information up to date among the fundamentals (<a href="https://developers.google.com/search/docs/appearance/ai-features">Google — AI features</a>). Merchant Center feeds have their own specification, which this issue doesn&rsquo;t cover.</li>
+<li><strong>OpenAI shopping discovery:</strong> the product feed reference is the documented route. On-page JSON-LD isn&rsquo;t described there as a substitute (<a href="https://developers.openai.com/commerce/specs/file-upload/products">OpenAI</a>).</li>
+</ul>
+<p>Many stores will want both, generated <strong>from one source of truth</strong> (your catalog database or platform export), so the price on the page, in the JSON-LD, and in the feed never disagree. If you maintain the feed by hand in a spreadsheet, the four failure modes in section 4 are the ones to automate first.</p>
+<hr>
+<h3 id="ten-minute-check">Ten-minute check</h3>
+<ol>
+<li>Export your catalog as CSV. Open it in a <strong>text editor</strong>, not a spreadsheet, and search for <code>E+</code>. Any hit in an ID or GTIN column means digits may already be lost.</li>
+<li>Search for <code>n/a</code>, <code>null</code>, and <code>TBD</code>, and delete them from optional fields.</li>
+<li>List the distinct values in your availability column. Each one should map to exactly one value from the OpenAI enumeration.</li>
+<li>On one product page, view the source and find the JSON-LD. Confirm there&rsquo;s an <code>Offer</code> (not only an <code>AggregateOffer</code>), a price above zero, and a currency, and that the price matches what the page shows.</li>
+<li>Write down which surface each fix was for. Ads and checkout integrations need their own checks.</li>
+</ol>
+<p><em>Disclosure: the author is building Catalog Sentry Local, a local CSV preflight tool that checks several of these rules. It isn&rsquo;t required for anything above, and every check here can be done by hand. This issue has no sponsor.</em></p>
+<p><strong>Sources</strong>
+- Google Search Central, Merchant listing structured data: https://developers.google.com/search/docs/appearance/structured-data/merchant-listing
+- Google Search Central, Product snippet structured data: https://developers.google.com/search/docs/appearance/structured-data/product
+- Google Search Central, AI features and your website: https://developers.google.com/search/docs/appearance/ai-features
+- OpenAI, Product feed schema: https://developers.openai.com/commerce/specs/file-upload/products
+- OWASP, CSV Injection: https://owasp.org/www-community/attacks/CSV_Injection</p>
+        </article>
+        
+  </main>
+  <footer class="site-footer">
+  <div class="inner">
+    <p class="footer-brand">Quiet Nib Notes is an independent, research-based site about fountain-pen care and troubleshooting. It is not a manufacturer, retailer, or repair workshop.</p>
+    <ul class="footer-links">
+      <li><a href="../../about/">About</a></li>
+      <li><a href="../../affiliate-disclosure/">Affiliate disclosure</a></li>
+      <li><a href="../../privacy/">Privacy</a></li>
+      <li><a href="../../newsletter/">Newsletter archive</a></li>
+      <li><a href="../../product-evidence-lens/privacy.html">Product Evidence Lens privacy</a></li>
+      <li><a href="mailto:yjs121256@gmail.com">yjs121256@gmail.com</a></li>
+    </ul>
+    <p class="footer-note">Citations stay with every article. Published 22 November 2026.</p>
+  </div>
+</footer>
+</body>
+</html>

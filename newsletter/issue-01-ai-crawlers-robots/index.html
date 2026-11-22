@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Issue 1: Your robots.txt now talks to several different AI systems. Here's what each line actually controls. — Quiet Nib Notes</title>
+  <meta name="description" content="What OpenAI, Perplexity, and Google actually say their crawlers and user-triggered fetchers do — and what robots.txt does not control.">
+  <link rel="canonical" href="https://yjs121256.github.io/quiet-nib-notes/newsletter/issue-01-ai-crawlers-robots/">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../css/site.css">
+  
+</head>
+<body>
+  <header class="site-header">
+  <div class="inner">
+    <a class="wordmark" href="../../">
+      <svg class="mark" width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+  <path fill="currentColor" d="M14 2.2c.5 0 .9.2 1.2.6l8.2 11.3c.5.7.3 1.7-.5 2.1l-7.4 3.7c-.9.45-1.9.45-2.8 0L4.3 16.2c-.8-.4-1-1.4-.5-2.1L12.8 2.8c.3-.4.7-.6 1.2-.6zm0 4.3L8.2 14.4 14 17.3l5.8-2.9L14 6.5zm-1.1 12.3 1.1 5.5 1.1-5.5c-.7.15-1.5.15-2.2 0z"/>
+</svg>
+      <span>Quiet Nib Notes</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="../../#guides">Guides</a>
+      <a href="../../newsletter/" class="is-active">Newsletter</a>
+      <a href="../../about/">About</a>
+    </nav>
+  </div>
+</header>
+  <main class="wrap">
+    
+        <p class="crumbs"><a href="../../">Home</a> · <a href="../">Newsletter</a> · Issue 1</p>
+        <article class="prose">
+          <p class="kicker">Merchant Evidence Brief · Issue 1</p>
+          <h1>Your robots.txt now talks to several different AI systems. Here's what each line actually controls.</h1>
+          <p><em>Sources checked 22 November 2026 (Korea Standard Time, UTC+9). Published here as a web archive.</em></p>
+<p>Many store owners have added a few &ldquo;block AI&rdquo; lines to robots.txt, or been told to add an <code>llms.txt</code> file &ldquo;for AI SEO.&rdquo; Both moves can have effects you didn&rsquo;t intend. Platform documentation separates <strong>search</strong> crawlers, <strong>training</strong> crawlers, and <strong>user-triggered</strong> fetchers, and they don&rsquo;t all obey the same switch. This issue walks through what three primary sources say, and what they don&rsquo;t.</p>
+<hr>
+<h3 id="1-openai-three-agents-three-different-jobs">1. OpenAI: three agents, three different jobs</h3>
+<p>OpenAI&rsquo;s crawler page lists separate user agents and says &ldquo;each setting is independent of the others&rdquo; (<a href="https://platform.openai.com/docs/bots">OpenAI</a>):</p>
+<ul>
+<li><strong>OAI-SearchBot</strong> is for search. It is &ldquo;used to surface websites in search results in ChatGPT&rsquo;s search features.&rdquo; Sites that opt out of it &ldquo;will not be shown in ChatGPT search answers, though can still appear as navigational links&rdquo; (<a href="https://platform.openai.com/docs/bots">OpenAI</a>).</li>
+<li><strong>GPTBot</strong> crawls content &ldquo;that may be used in training our generative AI foundation models.&rdquo; Disallowing it &ldquo;indicates a site&rsquo;s content should not be used in training&rdquo; (<a href="https://platform.openai.com/docs/bots">OpenAI</a>).</li>
+<li><strong>ChatGPT-User</strong> is used when a ChatGPT user&rsquo;s request causes a page visit. OpenAI says it &ldquo;is not used for crawling the web in an automatic fashion&rdquo; and, &ldquo;because these actions are initiated by a user, robots.txt rules may not apply.&rdquo; It &ldquo;is not used to determine whether content may appear in Search&rdquo; (<a href="https://platform.openai.com/docs/bots">OpenAI</a>).</li>
+</ul>
+<p>OpenAI also notes that for search it &ldquo;can take ~24 hours from a site&rsquo;s robots.txt update for our systems to adjust,&rdquo; and publishes IP lists for each agent (<a href="https://platform.openai.com/docs/bots">OpenAI</a>).</p>
+<p><strong>What this means for a store:</strong> &ldquo;Block GPTBot, allow OAI-SearchBot&rdquo; is a coherent setting according to OpenAI&rsquo;s own description. It signals no training use while staying eligible for ChatGPT search results. Blocking <code>OAI-SearchBot</code> is the line that removes you from ChatGPT search answers.</p>
+<p><strong>What it does not say:</strong> nothing on that page promises that allowing OAI-SearchBot gets you shown, or describes how results are ranked.</p>
+<hr>
+<h3 id="2-perplexity-a-search-crawler-and-a-user-fetcher">2. Perplexity: a search crawler and a user fetcher</h3>
+<p>Perplexity&rsquo;s documentation lists two agents and says each setting &ldquo;works independently,&rdquo; with up to 24 hours for changes to take effect (<a href="https://docs.perplexity.ai/guides/bots">Perplexity</a>):</p>
+<ul>
+<li><strong>PerplexityBot</strong> &ldquo;is designed to surface and link websites in search results on Perplexity. It is not used to crawl content for AI foundation models&rdquo; (<a href="https://docs.perplexity.ai/guides/bots">Perplexity</a>).</li>
+<li><strong>Perplexity-User</strong> supports user actions. When a user asks a question, it &ldquo;might visit a web page to help provide an accurate answer.&rdquo; The docs state: &ldquo;Since a user requested the fetch, this fetcher generally ignores robots.txt rules&rdquo; (<a href="https://docs.perplexity.ai/guides/bots">Perplexity</a>).</li>
+</ul>
+<p>The same page has a section most store owners skip: <strong>WAF configuration.</strong> If a firewall or CDN bot rule blocks unknown bots, robots.txt permission doesn&rsquo;t help. Perplexity recommends combining <strong>User-Agent matching with IP verification</strong> against its published JSON IP lists, and warns that Cloudflare&rsquo;s Bot Fight Mode &ldquo;can&rsquo;t be skipped with WAF custom rules&rdquo; (<a href="https://docs.perplexity.ai/guides/bots">Perplexity</a>).</p>
+<p><strong>What this means:</strong> if you <em>want</em> to appear in Perplexity&rsquo;s search results, check your CDN/WAF as well as robots.txt. If you want to restrict it, know that robots.txt is documented as largely ineffective for the user fetcher.</p>
+<hr>
+<h3 id="3-google-no-separate-ai-switch-for-search">3. Google: no separate &ldquo;AI&rdquo; switch for Search</h3>
+<p>Google&rsquo;s guidance on AI Overviews and AI Mode is short and direct (<a href="https://developers.google.com/search/docs/appearance/ai-features">Google Search Central</a>):</p>
+<ul>
+<li>&ldquo;There are no additional requirements to appear in AI Overviews or AI Mode, nor other special optimizations necessary.&rdquo;</li>
+<li>To be eligible as a supporting link, &ldquo;a page must be indexed and eligible to be shown in Google Search with a snippet.&rdquo;</li>
+<li>&ldquo;You don&rsquo;t need to create new machine readable files, AI text files, or markup to appear in these features. There&rsquo;s also no special schema.org structured data that you need to add.&rdquo;</li>
+<li>Controls: robots.txt for Googlebot manages crawling for Search, and <code>nosnippet</code>, <code>data-nosnippet</code>, <code>max-snippet</code>, or <code>noindex</code> limit what&rsquo;s shown. Google points to <strong>Google-Extended</strong> for limiting AI training and grounding &ldquo;in some of Google&rsquo;s other systems&rdquo; (<a href="https://developers.google.com/search/docs/appearance/ai-features">Google Search Central</a>).</li>
+<li>Google also lists &ldquo;making sure your structured data matches the visible text on the page&rdquo; and keeping Merchant Center information up to date among worthwhile fundamentals (<a href="https://developers.google.com/search/docs/appearance/ai-features">Google Search Central</a>).</li>
+</ul>
+<p><strong>What this means:</strong> blocking Googlebot to keep content out of AI Overviews would also remove you from regular Search. Snippet controls are the documented lever.</p>
+<hr>
+<h3 id="4-and-llmstxt">4. And llms.txt?</h3>
+<p><code>llms.txt</code> is a <strong>proposal</strong>, now in its second version, for a <code>/llms.txt</code> Markdown file &ldquo;to provide information to help agents use a website&rdquo; (<a href="https://llmstxt.org/">llmstxt.org</a>). The proposal&rsquo;s author reports wide adoption on documentation sites (<a href="https://llmstxt.org/">llmstxt.org</a>). OpenAI&rsquo;s and Perplexity&rsquo;s docs pages both point readers to their own llms.txt indexes (<a href="https://platform.openai.com/docs/bots">OpenAI</a>; <a href="https://docs.perplexity.ai/guides/bots">Perplexity</a>). But Google states that no AI text files are needed for its AI features (<a href="https://developers.google.com/search/docs/appearance/ai-features">Google Search Central</a>), and none of the three crawler pages above says an llms.txt affects search inclusion or ranking.</p>
+<p><strong>What this means:</strong> an llms.txt may be a harmless convenience for tools that read it. Treat it as optional. It isn&rsquo;t a ranking lever, and it doesn&rsquo;t replace robots.txt or snippet controls.</p>
+<hr>
+<h3 id="ten-minute-check-for-your-store">Ten-minute check for your store</h3>
+<ol>
+<li>Open <code>https://yourstore.example/robots.txt</code>. List every AI-related <code>User-agent</code> line, and for each, write down whether it&rsquo;s <strong>search</strong>, <strong>training</strong>, or <strong>user-triggered</strong>, using the definitions above.</li>
+<li>Confirm you haven&rsquo;t blocked a search agent (OAI-SearchBot, PerplexityBot, Googlebot) by accident while meaning to block training.</li>
+<li>Check your CDN/WAF bot settings. A &ldquo;block AI bots&rdquo; toggle may act regardless of robots.txt.</li>
+<li>If you use <code>nosnippet</code>, check it&rsquo;s intentional on product pages.</li>
+<li>Note the date. OpenAI and Perplexity both say robots.txt changes can take about 24 hours to be reflected (<a href="https://platform.openai.com/docs/bots">OpenAI</a>; <a href="https://docs.perplexity.ai/guides/bots">Perplexity</a>).</li>
+</ol>
+<h3 id="quick-reference">Quick reference</h3>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Purpose (per the vendor&rsquo;s docs)</th>
+<th>Honors robots.txt?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OAI-SearchBot</td>
+<td>ChatGPT search results</td>
+<td>Yes (it&rsquo;s the documented opt-out)</td>
+</tr>
+<tr>
+<td>GPTBot</td>
+<td>Foundation-model training</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>ChatGPT-User</td>
+<td>User-initiated visits</td>
+<td>&ldquo;may not apply&rdquo;</td>
+</tr>
+<tr>
+<td>PerplexityBot</td>
+<td>Perplexity search results; not training</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Perplexity-User</td>
+<td>User-initiated visits</td>
+<td>&ldquo;generally ignores&rdquo;</td>
+</tr>
+<tr>
+<td>Googlebot</td>
+<td>Google Search, including AI features</td>
+<td>Yes; use snippet controls to limit display</td>
+</tr>
+</tbody>
+</table>
+<p><em>Next issue: what &ldquo;machine-readable product data&rdquo; means in two concrete specs, Google merchant-listing structured data and OpenAI&rsquo;s product feed.</em></p>
+<hr>
+<p><em>Merchant Evidence Brief is independent and has no affiliation with OpenAI, Perplexity, or Google. This issue has no sponsor.</em></p>
+<p><strong>Sources</strong>
+- OpenAI, &ldquo;Overview of OpenAI Crawlers&rdquo;: https://platform.openai.com/docs/bots
+- Perplexity, &ldquo;Perplexity Crawlers&rdquo;: https://docs.perplexity.ai/guides/bots
+- Google Search Central, &ldquo;AI features and your website&rdquo; (last updated 2025-12-10 UTC): https://developers.google.com/search/docs/appearance/ai-features
+- llms.txt proposal: https://llmstxt.org/</p>
+        </article>
+        
+  </main>
+  <footer class="site-footer">
+  <div class="inner">
+    <p class="footer-brand">Quiet Nib Notes is an independent, research-based site about fountain-pen care and troubleshooting. It is not a manufacturer, retailer, or repair workshop.</p>
+    <ul class="footer-links">
+      <li><a href="../../about/">About</a></li>
+      <li><a href="../../affiliate-disclosure/">Affiliate disclosure</a></li>
+      <li><a href="../../privacy/">Privacy</a></li>
+      <li><a href="../../newsletter/">Newsletter archive</a></li>
+      <li><a href="../../product-evidence-lens/privacy.html">Product Evidence Lens privacy</a></li>
+      <li><a href="mailto:yjs121256@gmail.com">yjs121256@gmail.com</a></li>
+    </ul>
+    <p class="footer-note">Citations stay with every article. Published 22 November 2026.</p>
+  </div>
+</footer>
+</body>
+</html>
